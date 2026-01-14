@@ -24,36 +24,31 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
-          # ---- Backend key ----
-          echo "${{ secrets.SSH_KEY_RRHH_BACKEND }}" > ~/.ssh/id_ed25519_backend
-          chmod 600 ~/.ssh/id_ed25519_backend
+          echo "${{ secrets.SSH_KEY_RRHH_BACKEND }}" > ~/.ssh/id_backend
+          echo "${{ secrets.SSH_KEY_RRHH_FRONTEND }}" > ~/.ssh/id_frontend
 
-          # ---- Frontend key ----
-          echo "${{ secrets.SSH_KEY_RRHH_FRONTEND }}" > ~/.ssh/id_ed25519_frontend
-          chmod 600 ~/.ssh/id_ed25519_frontend
+          chmod 600 ~/.ssh/id_backend ~/.ssh/id_frontend
 
-          # Known hosts (para evitar prompt interactivo)
-          ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-          # Config: usa llave distinta según el repo que se esté clonando
           cat > ~/.ssh/config << 'EOF'
           Host github.com-backend
             HostName github.com
             User git
-            IdentityFile ~/.ssh/id_ed25519_backend
+            IdentityFile ~/.ssh/id_backend
             IdentitiesOnly yes
 
           Host github.com-frontend
             HostName github.com
             User git
-            IdentityFile ~/.ssh/id_ed25519_frontend
+            IdentityFile ~/.ssh/id_frontend
             IdentitiesOnly yes
           EOF
+
           chmod 600 ~/.ssh/config
 
-          # Reescribe URLs de submódulos para que usen los hosts "virtuales"
-          git config --global url."git@github.com-backend:".insteadOf "git@github.com:ccavero/rrhh-backend.git"
-          git config --global url."git@github.com-frontend:".insteadOf "git@github.com:ccavero/rrhh-frontend.git"
+          git config --global url."git@github.com-backend:ccavero/".insteadOf "git@github.com:ccavero/"
+          git config --global url."git@github.com-frontend:ccavero/".insteadOf "git@github.com:ccavero/"
 
       - name: Init & update submodules
         shell: bash
