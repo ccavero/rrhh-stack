@@ -1,23 +1,22 @@
+![CI](https://github.com/ccavero/rrhh-stack/actions/workflows/test.yml/badge.svg)
+
 # 🧩 RRHH Stack
 
-Repositorio principal del **stack RRHH**, que orquesta **backend** y **frontend** usando **Git Submodules**.
-
-Este repositorio **no contiene lógica de negocio**. Su función es:
-- Coordinar versiones de backend y frontend
-- Centralizar Docker / docker-compose
-- Facilitar despliegues y trabajo en equipo
+Repositorio principal del **Stack de Gestión de Recursos Humanos (RRHH)**, que orquesta el **backend** y el **frontend** mediante **Git Submodules**, centralizando la integración, validación y pruebas automáticas del proyecto.
 
 ---
 
-## 📂 Estructura del proyecto
+## 📦 Estructura del proyecto
+
+Este repositorio actúa como **orquestador** del stack completo:
 
 ```text
-rrhh-stack
-├── docker-compose.yml
-├── Dockerfile
-├── rrhh-backend    (submodule → repo independiente)
-├── rrhh-frontend   (submodule → repo independiente)
-└── README.md
+rrhh-stack/
+├── rrhh-backend/    # API Backend (NestJS)
+├── rrhh-frontend/   # Frontend (React / Vite)
+└── .github/
+    └── workflows/
+        └── test.yml # Pipeline de CI
 ```
 
 ### Repositorios
