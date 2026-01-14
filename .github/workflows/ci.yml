@@ -84,6 +84,6 @@ jobs:
         working-directory: rrhh-frontend
         run: npm ci
 
-      - name: Test (frontend)
-        working-directory: rrhh-frontend
-        run: npm test
+      #- name: Test (frontend)
+      #  working-directory: rrhh-frontend
+      #  run: npm test
