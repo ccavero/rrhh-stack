@@ -1,0 +1,107 @@
+name: CI (rrhh-stack)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout rrhh-stack (sin submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Setup SSH for submodules (2 deploy keys)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # ---- Backend key ----
+          echo "${{ secrets.SSH_KEY_RRHH_BACKEND }}" > ~/.ssh/id_ed25519_backend
+          chmod 600 ~/.ssh/id_ed25519_backend
+
+          # ---- Frontend key ----
+          echo "${{ secrets.SSH_KEY_RRHH_FRONTEND }}" > ~/.ssh/id_ed25519_frontend
+          chmod 600 ~/.ssh/id_ed25519_frontend
+
+          # Known hosts (para evitar prompt interactivo)
+          ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts
+
+          # Config: usa llave distinta según el repo que se esté clonando
+          cat > ~/.ssh/config << 'EOF'
+          Host github.com-backend
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/id_ed25519_backend
+            IdentitiesOnly yes
+
+          Host github.com-frontend
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/id_ed25519_frontend
+            IdentitiesOnly yes
+          EOF
+          chmod 600 ~/.ssh/config
+
+          # Reescribe URLs de submódulos para que usen los hosts "virtuales"
+          git config --global url."git@github.com-backend:".insteadOf "git@github.com:ccavero/rrhh-backend.git"
+          git config --global url."git@github.com-frontend:".insteadOf "git@github.com:ccavero/rrhh-frontend.git"
+
+      - name: Init & update submodules
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule sync --recursive
+          git submodule update --init --recursive
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # =========================
+      # Backend: install + test
+      # =========================
+      - name: Backend - npm ci
+        working-directory: rrhh-backend
+        run: npm ci
+
+      - name: Backend - lint
+        working-directory: rrhh-backend
+        run: npm run lint
+
+      - name: Backend - test
+        working-directory: rrhh-backend
+        run: npm test
+
+      - name: Backend - build
+        working-directory: rrhh-backend
+        run: npm run build
+
+      # =========================
+      # Frontend: install + test
+      # =========================
+      - name: Frontend - npm ci
+        working-directory: rrhh-frontend
+        run: npm ci
+
+      - name: Frontend - lint
+        working-directory: rrhh-frontend
+        run: npm run lint
+
+      - name: Frontend - test
+        working-directory: rrhh-frontend
+        run: npm test --if-present
+
+      - name: Frontend - build
+        working-directory: rrhh-frontend
+        run: npm run build
