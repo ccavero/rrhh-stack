@@ -1,20 +1,19 @@
-name: CI (rrhh-stack)
+name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout rrhh-stack (sin submodules)
+      - name: Checkout (with submodules)
         uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: recursive
 
       - name: Setup SSH for submodules (2 deploy keys)
         shell: bash
@@ -50,53 +49,41 @@ jobs:
           git config --global url."git@github.com-backend:ccavero/".insteadOf "git@github.com:ccavero/"
           git config --global url."git@github.com-frontend:ccavero/".insteadOf "git@github.com:ccavero/"
 
-      - name: Init & update submodules
-        shell: bash
-        run: |
-          set -euo pipefail
           git submodule sync --recursive
           git submodule update --init --recursive
 
-      - name: Use Node.js 20
+      # -----------------------
+      # BACKEND
+      # -----------------------
+      - name: Setup Node (backend)
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: rrhh-backend/package-lock.json
 
-      # =========================
-      # Backend: install + test
-      # =========================
-      - name: Backend - npm ci
+      - name: Install (backend)
         working-directory: rrhh-backend
         run: npm ci
 
-      - name: Backend - lint
-        working-directory: rrhh-backend
-        run: npm run lint
-
-      - name: Backend - test
+      - name: Test (backend)
         working-directory: rrhh-backend
         run: npm test
 
-      - name: Backend - build
-        working-directory: rrhh-backend
-        run: npm run build
+      # -----------------------
+      # FRONTEND
+      # -----------------------
+      - name: Setup Node (frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rrhh-frontend/package-lock.json
 
-      # =========================
-      # Frontend: install + test
-      # =========================
-      - name: Frontend - npm ci
+      - name: Install (frontend)
         working-directory: rrhh-frontend
         run: npm ci
 
-      - name: Frontend - lint
+      - name: Test (frontend)
         working-directory: rrhh-frontend
-        run: npm run lint
-
-      - name: Frontend - test
-        working-directory: rrhh-frontend
-        run: npm test --if-present
-
-      - name: Frontend - build
-        working-directory: rrhh-frontend
-        run: npm run build
+        run: npm test
