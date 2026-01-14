@@ -7,3 +7,5 @@
 **/coverage
 **/*.tsbuildinfo
 **/*.log
+gh_actions_rrhh_*
+*.pub
