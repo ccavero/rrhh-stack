@@ -1,4 +1,4 @@
-![CI](https://github.com/ccavero/rrhh-stack/actions/workflows/test.yml/badge.svg)
+![CI](https://github.com/ccavero/rrhh-stack/actions/workflows/ci.yml/badge.svg)
 
 # 🧩 RRHH Stack
 
