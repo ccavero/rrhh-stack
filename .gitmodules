@@ -1,7 +1,7 @@
 
 [submodule "rrhh-backend"]
 	path = rrhh-backend
-	url = https://github.com/ccavero/rrhh-backend.git
+	url = git@github.com:ccavero/rrhh-backend.git
 [submodule "rrhh-frontend"]
 	path = rrhh-frontend
-	url = https://github.com/ccavero/rrhh-frontend.git
+	url = git@github.com:ccavero/rrhh-frontend.git
